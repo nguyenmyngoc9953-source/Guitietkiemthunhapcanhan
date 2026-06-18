@@ -1,37 +1,35 @@
-def calculate_pit_with_insurance(gross_income: float, dependents: int) -> float:
-    """
-    Calculate PIT including mandatory insurance deductions (10.5%).
-    Base salary for insurance cap assumed at 2,340,000 VND (Max cap = 20 times base).
-    """
-    # 1. Calculate Mandatory Insurance (8% BHXH + 1.5% BHYT + 1% BHTN = 10.5%)
-    # Note: Max income for BHXH/BHYT cap is 20 times the base salary
-    base_salary = 2340000  
-    insurance_cap_income = base_salary * 20
+def tinh_thue_tncn(thu_nhap_chiu_thue, so_nguoi_phu_thuoc=0):
+    # 1. Các khoản giảm trừ
+    giam_tru_ban_than = 11000000
+    giam_tru_phu_thuoc = so_nguoi_phu_thuoc * 4400000
+    tong_giam_tru = giam_tru_ban_than + giam_tru_phu_thuoc
     
-    if gross_income > insurance_cap_income:
-        insurance = insurance_cap_income * 0.105
-    else:
-        insurance = gross_income * 0.105
-        
-    # 2. Deductions
-    personal_deduction = 15500000
-    dependent_deduction = 6200000
-    total_deductions = personal_deduction + (dependents * dependent_deduction)
+    # 2. Thu nhập tính thuế
+    thu_nhap_tinh_thue = max(0, thu_nhap_chiu_thue - tong_giam_tru)
     
-    # 3. Taxable Income (Thu nhập tính thuế sau khi trừ Bảo hiểm và Giảm trừ)
-    taxable_income = gross_income - insurance - total_deductions
+    # 3. Tính thuế theo biểu lũy tiến từng phần
+    muc_thue = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35]
+    gioi_han = [5000000, 10000000, 1800000, 32000000, 52000000, 80000000] # Phần chênh lệch từng bậc
+    thue_phai_nop = 0
     
-    if taxable_income <= 0:
-        return 0.0
-        
-    # Progressive tax brackets
-    if taxable_income <= 10000000:
-        return taxable_income * 0.05
-    elif taxable_income <= 30000000:
-        return (taxable_income * 0.10) - 500000
-    elif taxable_income <= 60000000:
-        return (taxable_income * 0.20) - 3500000
-    elif taxable_income <= 100000000:
-        return (taxable_income * 0.30) - 9500000
-    else:
-        return (taxable_income * 0.35) - 14500000
+    if thu_nhap_tinh_thue > 0:
+        if thu_nhap_tinh_thue <= 5000000:
+            thue_phai_nop = thu_nhap_tinh_thue * muc_thue[0]
+        elif thu_nhap_tinh_thue <= 10000000:
+            thue_phai_nop = (5000000 * muc_thue[0]) + ((thu_nhap_tinh_thue - 5000000) * muc_thue[1])
+        elif thu_nhap_tinh_thue <= 18000000:
+            thue_phai_nop = (5000000 * muc_thue[0]) + (5000000 * muc_thue[1]) + ((thu_nhap_tinh_thue - 10000000) * muc_thue[2])
+        elif thu_nhap_tinh_thue <= 32000000:
+            thue_phai_nop = (5000000 * muc_thue[0]) + (5000000 * muc_thue[1]) + (8000000 * muc_thue[2]) + ((thu_nhap_tinh_thue - 18000000) * muc_thue[3])
+        elif thu_nhap_tinh_thue <= 52000000:
+            thue_phai_nop = 250000 + 500000 + 1200000 + (thu_nhap_tinh_thue - 32000000) * muc_thue[4]
+        elif thu_nhap_tinh_thue <= 80000000:
+            thue_phai_nop = 250000 + 500000 + 1200000 + 4000000 + (thu_nhap_tinh_thue - 52000000) * muc_thue[5]
+        else:
+            thue_phai_nop = 250000 + 500000 + 1200000 + 4000000 + 5000000 + 8400000 + (thu_nhap_tinh_thue - 80000000) * muc_thue[6]
+            
+    return thue_phai_nop
+
+# Ví dụ thực tế: Thu nhập chịu thuế là 30.000.000 VNĐ, có 1 người phụ thuộc
+luong_net = tinh_thue_tncn(30000000, 1)
+print(f"Thuế TNCN phải nộp là: {luong_net:,.0f} VNĐ")
