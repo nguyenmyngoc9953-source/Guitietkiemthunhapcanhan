@@ -4,42 +4,51 @@ import streamlit as st
 st.title("💰 Ứng dụng tính thu nhập cá nhân Đề tài 3 Nguyễn Thị Mỹ Ngọc")
 
 # Nhập dữ liệu
-C = st.number_input(
-    "Nhập số tiền thu nhập cá nhân (triệu đồng)",
-    min_value=0.0,
-    value=100.0
-)
-
-i = st.number_input(
-    "Nhập lãi suất gửi tiết kiệm theo năm (%)",
-    min_value=0.0,
-    value=6.0
-)
-
-n = st.number_input(
-    "Nhập số tháng thu nhập cá nhân",
-    min_value=1,
-    value=12
-)
-
-# Đổi lãi suất từ % sang số thập phân
-i = i / 100
-
-# Nút tính toán
-if st.button("Tính toán"):
+def tinh_thue_tncn(thu_nhap_chiu_thue, so_nguoi_phu_thuoc=0, bao_hiem=0):
+    # 1. Tính các khoản giảm trừ
+    giam_tru_ban_than = 11000000
+    giam_tru_phu_thuoc = so_nguoi_phu_thuoc * 4400000
+    tong_giam_tru = giam_tru_ban_than + giam_tru_phu_thuoc + bao_hiem
     
-    # Lãi đơn
-    An = C * (1 + (i / 12) * n)
+    # 2. Tính thu nhập tính thuế
+    thu_nhap_tinh_thue = thu_nhap_chiu_thue - tong_giam_tru
+    if thu_nhap_tinh_thue <= 0:
+        return 0, 0
+        
+    # 3. Tính thuế theo phương pháp lũy tiến từng phần
+    bac_thue = [
+        (5000000, 0.05),
+        (10000000, 0.10),
+        (18000000, 0.15),
+        (32000000, 0.20),
+        (52000000, 0.25),
+        (80000000, 0.30),
+        (float('inf'), 0.35)
+    ]
+    
+    thue_phai_nop = 0
+    thu_nhap_con_lai = thu_nhap_tinh_thue
+    han_muc_truoc = 0
+    
+    for han_muc, thue_suat in bac_thue:
+        khoang_cach = han_muc - han_muc_truoc
+        if thu_nhap_con_lai > khoang_cach:
+            thue_phai_nop += khoang_cach * thue_suat
+            thu_nhap_con_lai -= khoang_cach
+            han_muc_truoc = han_muc
+        else:
+            thue_phai_nop += thu_nhap_con_lai * thue_suat
+            break
+            
+    return thu_nhap_tinh_thue, round(thue_phai_nop)
 
-    # Lãi kép
-    Bn = C * (1 + i / 12) ** n
+# --- KHU VỰC NHẬP SỐ LIỆU CỦA BẠN ĐỂ CHẠY THỬ ---
+thu_nhap = 30000000  # Tổng thu nhập chịu thuế (Ví dụ: 30 triệu)
+nguoi_phu_thuoc = 1  # Số người phụ thuộc (Ví dụ: 1 người)
+tien_bao_hiem = 3150000 # Tiền bảo hiểm bắt buộc 10.5% (Ví dụ: 3,15 triệu)
 
-    st.success("Kết quả tính toán")
+# Chạy lệnh tính toán
+tntt, thue = tinh_thue_tncn(thu_nhap, nguoi_phu_thuoc, tien_bao_hiem)
 
-    st.write(
-        f"📌 Số tiền thu nhập cá nhân theo lãi đơn: **{An:,.2f} triệu đồng**"
-    )
-
-    st.write(
-        f"📌 Số tiền thu nhập cá nhân theo lãi kép: **{Bn:,.2f} triệu đồng**"
-    )
+print(f"Thu nhập tính thuế: {tntt:,} VNĐ")
+print(f"Thuế TNCN phải nộp: {thue:,} VNĐ")
