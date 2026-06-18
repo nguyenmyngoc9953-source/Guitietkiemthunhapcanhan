@@ -1,5 +1,5 @@
 import streamlit as st
-
+st.image("IMG_7732.jpeg", use_column_width=True)
 st.title("💰 App tính Thuế Thu Nhập Cá Nhân đề tài 3 Nguyễn Thị Mỹ Ngọc")
 
 # 3. Ô nhập dữ liệu số thu nhập trước thuế (có nút + -)
