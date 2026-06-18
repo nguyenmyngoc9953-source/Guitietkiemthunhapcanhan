@@ -1,35 +1,37 @@
-def tinh_thue_tncn(thu_nhap_chiu_thue, so_nguoi_phu_thuoc=0):
-    # 1. Các khoản giảm trừ
-    giam_tru_ban_than = 11000000
-    giam_tru_phu_thuoc = so_nguoi_phu_thuoc * 4400000
-    tong_giam_tru = giam_tru_ban_than + giam_tru_phu_thuoc
+def tinh_thue_tncn(thu_nhap_chiu_thue, nguoi_phu_thuoc=0):
+    # Các khoản giảm trừ (Cập nhật mức mới nhất)
+    # Giảm trừ bản thân: 11 triệu đồng/tháng
+    # Giảm trừ người phụ thuộc: 4.4 triệu đồng/người/tháng
+    giam_tru_ban_than = 11.0
+    giam_tru_nguoi_phu_thuoc = 4.4 * nguoi_phu_thuoc
     
-    # 2. Thu nhập tính thuế
-    thu_nhap_tinh_thue = max(0, thu_nhap_chiu_thue - tong_giam_tru)
+    # Thu nhập tính thuế
+    thu_nhap_tinh_thue = thu_nhap_chiu_thue - giam_tru_ban_than - giam_tru_nguoi_phu_thuoc
     
-    # 3. Tính thuế theo biểu lũy tiến từng phần
-    muc_thue = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35]
-    gioi_han = [5000000, 10000000, 1800000, 32000000, 52000000, 80000000] # Phần chênh lệch từng bậc
-    thue_phai_nop = 0
+    # Nếu thu nhập tính thuế <= 0, không phải đóng thuế
+    if thu_nhap_tinh_thue <= 0:
+        return 0.0
+        
+    # Tính thuế theo biểu thuế lũy tiến (triệu đồng/tháng)
+    bac_thue = [
+        (5.0, 0.05),   # Đến 5 triệu: 5%
+        (10.0, 0.10),  # Từ 5 - 10 triệu: 10%
+        (18.0, 0.15),  # Từ 10 - 18 triệu: 15%
+        (32.0, 0.20),  # Từ 18 - 32 triệu: 20%
+        (52.0, 0.25),  # Từ 32 - 52 triệu: 25%
+        (80.0, 0.30),  # Từ 52 - 80 triệu: 30%
+        (float('inf'), 0.35) # Trên 80 triệu: 35%
+    ]
     
-    if thu_nhap_tinh_thue > 0:
-        if thu_nhap_tinh_thue <= 5000000:
-            thue_phai_nop = thu_nhap_tinh_thue * muc_thue[0]
-        elif thu_nhap_tinh_thue <= 10000000:
-            thue_phai_nop = (5000000 * muc_thue[0]) + ((thu_nhap_tinh_thue - 5000000) * muc_thue[1])
-        elif thu_nhap_tinh_thue <= 18000000:
-            thue_phai_nop = (5000000 * muc_thue[0]) + (5000000 * muc_thue[1]) + ((thu_nhap_tinh_thue - 10000000) * muc_thue[2])
-        elif thu_nhap_tinh_thue <= 32000000:
-            thue_phai_nop = (5000000 * muc_thue[0]) + (5000000 * muc_thue[1]) + (8000000 * muc_thue[2]) + ((thu_nhap_tinh_thue - 18000000) * muc_thue[3])
-        elif thu_nhap_tinh_thue <= 52000000:
-            thue_phai_nop = 250000 + 500000 + 1200000 + (thu_nhap_tinh_thue - 32000000) * muc_thue[4]
-        elif thu_nhap_tinh_thue <= 80000000:
-            thue_phai_nop = 250000 + 500000 + 1200000 + 4000000 + (thu_nhap_tinh_thue - 52000000) * muc_thue[5]
+    tien_thue = 0.0
+    han_muc_truoc = 0.0
+    
+    for han_muc, thue_suat in bac_thue:
+        if thu_nhap_tinh_thue > han_muc:
+            tien_thue += (han_muc - han_muc_truoc) * thue_suat
+            han_muc_truoc = han_muc
         else:
-            thue_phai_nop = 250000 + 500000 + 1200000 + 4000000 + 5000000 + 8400000 + (thu_nhap_tinh_thue - 80000000) * muc_thue[6]
+            tien_thue += (thu_nhap_tinh_thue - han_muc_truoc) * thue_suat
+            break
             
-    return thue_phai_nop
-
-# Ví dụ thực tế: Thu nhập chịu thuế là 30.000.000 VNĐ, có 1 người phụ thuộc
-luong_net = tinh_thue_tncn(30000000, 1)
-print(f"Thuế TNCN phải nộp là: {luong_net:,.0f} VNĐ")
+    return tien_thue
