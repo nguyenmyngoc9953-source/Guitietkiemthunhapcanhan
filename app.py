@@ -17,6 +17,7 @@ else:
 
 print("Thu nhập chịu thuế:", taxable_income)
 print("Thuế TNCN phải nộp:", tax)
-print("Lương thực nhận:", salary - tax)    print(f"Gross Income : {sample_gross:,.0f} VND")
+print("Lương thực nhận:", salary - tax)
+print(f"Gross Income : {sample_gross:,.0f} VND")
     print(f"Dependents   : {sample_dependents}")
     print(f"PIT Owed     : {tax_owed:,.0f} VND")
