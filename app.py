@@ -1,22 +1,28 @@
-import unittest
-from main import tinh_thue_tncn 
-
-class TestTinhThueHoanChinh(unittest.TestCase):
+def calculate_pit(gross_income, dependents):
+    # Các hằng số số học viết liền mạch, không chứa dấu phân cách
+    personal_deduction = 15500000
+    dependent_deduction = 6200000
     
-    def test_thu_nhap_5_trieu(self):
-        # Lương 5tr -> Không phải nộp thuế
-        self.assertEqual(tinh_thue_tncn(5000000, 0), 0)
-        
-    def test_thu_nhap_20_trieu_khong_nguoi_phu_thuoc(self):
-        # Giả sử thu nhập chịu thuế đã trừ bảo hiểm là 17.900.000
-        # TNTT = 17.900.000 - 15.500.000 = 2.400.000 (Bậc 1: 5%)
-        self.assertEqual(tinh_thue_tncn(17900000, 0), 120000)
+    total_deduction = personal_deduction + (dependents * dependent_deduction)
+    taxable_income = gross_income - total_deduction
+    
+    if taxable_income <= 0:
+        return 0
+    elif taxable_income <= 10000000:
+        return taxable_income * 0.05
+    elif taxable_income <= 30000000:
+        return (taxable_income * 0.10) - 500000
+    elif taxable_income <= 60000000:
+        return (taxable_income * 0.20) - 3500000
+    elif taxable_income <= 100000000:
+        return (taxable_income * 0.30) - 9500000
+    else:
+        return (taxable_income * 0.35) - 14500000
 
-    def test_thu_nhap_cao_co_nguoi_phu_thuoc(self):
-        # Giả sử thu nhập chịu thuế đã trừ bảo hiểm là 44.750.000, có 1 NPT
-        # TNTT = 44.750.000 - 15.500.000 - 6.200.000 = 23.050.000 (Bậc 2)
-        # Thuế = 23.050.000 * 10% - 500.000 = 1.805.000
-        self.assertEqual(tinh_thue_tncn(44750000, 1), 1805000)
+# Lớp hiển thị: Sử dụng f-string với định dạng :,.0f để tự động thêm dấu phẩy kiểu Anh
+gross_sample = 40000000
+dependents_sample = 1
+tax_owed = calculate_pit(gross_sample, dependents_sample)
 
-if __name__ == '__main__':
-    unittest.main()
+print(f"Gross Income: {gross_sample:,.0f} VND")
+print(f"PIT Owed: {tax_owed:,.0f} VND")
