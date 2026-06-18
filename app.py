@@ -1,5 +1,5 @@
 import streamlit as st
-
+st.image("IMG_7732.jpeg")
 st.title("💰 Ứng dụng tính tiền gửi tiết kiệm & Thuế TNCN Đề tài 3 _ Nguyễn Thị Mỹ Ngọc")
 
 st.header("1. Tính tiền gửi tiết kiệm")
