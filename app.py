@@ -1,5 +1,5 @@
 import streamlit as st
-st.image("")
+st.image("IMG_7732.jpeg")
 st.set_page_config(page_title="App Tính Toán Tài Chính", page_icon="💰", layout="centered")
 
 st.title("💰 Ứng dụng tính tiền gửi tiết kiệm & Thuế TNCN")
